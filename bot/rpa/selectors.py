@@ -3,7 +3,11 @@ PORTAL_LOGIN_USERNAME = "css=input#username"  # AJUSTAR SELECTOR
 PORTAL_LOGIN_PASSWORD = "css=input#password"  # AJUSTAR SELECTOR
 PORTAL_LOGIN_SUBMIT = "css=button[type=submit]"  # AJUSTAR SELECTOR
 PORTAL_LOGIN_SUCCESS = "css=div.dashboard"  # AJUSTAR SELECTOR
-PORTAL_DOWNLOAD_BUTTON = "css=button#download"  # AJUSTAR SELECTOR
+PORTAL_MENU_REPORTS = "css=button#reports"  # AJUSTAR SELECTOR
+PORTAL_REPORT_TYPE_SELECT = "css=select#tipoReporte"  # AJUSTAR SELECTOR
+PORTAL_REPORT_START_DATE = "css=input#fechaInicio"  # AJUSTAR SELECTOR
+PORTAL_REPORT_END_DATE = "css=input#fechaFin"  # AJUSTAR SELECTOR
+PORTAL_REPORT_GENERATE_BUTTON = "css=button#generar"  # AJUSTAR SELECTOR
 
 # Core financiero login
 CORE_LOGIN_USERNAME = "css=input#username"  # AJUSTAR SELECTOR

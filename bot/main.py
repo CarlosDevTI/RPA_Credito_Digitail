@@ -7,9 +7,10 @@ from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 from playwright.sync_api import sync_playwright
 
 from .rpa.config import load_config
-from .rpa.core_upload import CoreUploadError, upload_to_core
 from .rpa.download import DownloadError, download_portal_file
 from .rpa.logging_utils import log_exception, safe_screenshot, setup_logging
+from .rpa.linix_app import LinixError, run_linix_flow
+from .rpa.oracle_proc import OracleError, build_oracle_files
 from .rpa.transform import TransformError, transform_file
 
 
@@ -29,13 +30,36 @@ def main() -> None:
             page.set_default_navigation_timeout(config.nav_timeout_ms)
 
             downloaded_path = download_portal_file(page, config, run_ctx)
-            output_path = transform_file(downloaded_path, run_ctx.outputs_dir)
-            upload_to_core(page, config, run_ctx, output_path)
-
-            logger.info("Run completed OK.")
             context.close()
             browser.close()
-    except (DownloadError, TransformError, CoreUploadError, PlaywrightTimeoutError) as exc:
+            page = None
+
+            transform_result = transform_file(
+                downloaded_path,
+                run_ctx.outputs_dir,
+                config.output_encoding,
+                config.periodicidad_default,
+            )
+
+            oracle_outputs = None
+            if config.enable_oracle:
+                oracle_outputs = build_oracle_files(
+                    transform_result.records,
+                    run_ctx.outputs_dir,
+                    config,
+                )
+
+            if config.enable_linix:
+                run_linix_flow(
+                    config=config,
+                    run_ctx=run_ctx,
+                    linix_file=transform_result.linix_file,
+                    documentos_file=oracle_outputs.documentos_file if oracle_outputs else None,
+                    ahorros_file=oracle_outputs.ahorros_file if oracle_outputs else None,
+                )
+
+            logger.info("Run completed OK.")
+    except (DownloadError, TransformError, OracleError, LinixError, PlaywrightTimeoutError) as exc:
         log_exception(logger, "Run failed: %s", exc)
         if page:
             safe_screenshot(page, run_ctx, "error")

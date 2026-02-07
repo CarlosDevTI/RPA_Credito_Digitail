@@ -30,13 +30,24 @@ class Config:
     portal_needs_login: bool
     portal_username: str
     portal_password: str
-    core_login_url: str
-    core_username: str
-    core_password: str
-    core_section1_url: str
-    core_section2_url: str
-    core_section1_fields: dict
-    core_section2_fields: dict
+    portal_report_type_text: str
+    portal_date_format: str
+    output_encoding: str
+    periodicidad_default: str
+    enable_linix: bool
+    linix_app_path: str
+    linix_window_title: str
+    linix_descripcion: str
+    linix_modalidad: str
+    linix_destinacion: str
+    linix_contabilizar: str
+    linix_tipo_movimiento: str
+    enable_oracle: bool
+    oracle_user: str
+    oracle_password: str
+    oracle_dsn: str
+    oracle_lib_dir: str
+    oracle_schema: str
     run_context: RunContext
 
 
@@ -103,6 +114,20 @@ def load_config() -> Config:
     if portal_needs_login and (not portal_username or not portal_password):
         raise ValueError("PORTAL_USERNAME and PORTAL_PASSWORD are required when PORTAL_NEEDS_LOGIN=true")
 
+    enable_linix = _env_bool("ENABLE_LINIX", True)
+    enable_oracle = _env_bool("ENABLE_ORACLE", True)
+
+    linix_app_path = os.getenv("LINIX_APP_PATH", "")
+    linix_window_title = os.getenv("LINIX_WINDOW_TITLE", "")
+    if enable_linix and (not linix_app_path or not linix_window_title):
+        raise ValueError("LINIX_APP_PATH and LINIX_WINDOW_TITLE are required when ENABLE_LINIX=true")
+
+    oracle_user = os.getenv("ORACLE_USER", "")
+    oracle_password = os.getenv("ORACLE_PASSWORD", "")
+    oracle_dsn = os.getenv("ORACLE_DSN", "")
+    if enable_oracle and (not oracle_user or not oracle_password or not oracle_dsn):
+        raise ValueError("ORACLE_USER, ORACLE_PASSWORD and ORACLE_DSN are required when ENABLE_ORACLE=true")
+
     return Config(
         headless=_env_bool("HEADLESS", True),
         dry_run=_env_bool("DRY_RUN", False),
@@ -115,12 +140,23 @@ def load_config() -> Config:
         portal_needs_login=portal_needs_login,
         portal_username=portal_username,
         portal_password=portal_password,
-        core_login_url=_env_required("CORE_LOGIN_URL"),
-        core_username=_env_required("CORE_USERNAME"),
-        core_password=_env_required("CORE_PASSWORD"),
-        core_section1_url=_env_required("CORE_SECTION1_URL"),
-        core_section2_url=_env_required("CORE_SECTION2_URL"),
-        core_section1_fields=_env_json_dict("CORE_SECTION1_FIELDS_JSON"),
-        core_section2_fields=_env_json_dict("CORE_SECTION2_FIELDS_JSON"),
+        portal_report_type_text=os.getenv("PORTAL_REPORT_TYPE_TEXT", "").strip(),
+        portal_date_format=os.getenv("PORTAL_DATE_FORMAT", "%m/%d/%Y").strip(),
+        output_encoding=os.getenv("OUTPUT_ENCODING", "utf-8").strip(),
+        periodicidad_default=os.getenv("PERIODICIDAD_DEFAULT", "1").strip(),
+        enable_linix=enable_linix,
+        linix_app_path=linix_app_path,
+        linix_window_title=linix_window_title,
+        linix_descripcion=os.getenv("LINIX_DESCRIPCION", "Desembolso Credito Digital").strip(),
+        linix_modalidad=os.getenv("LINIX_MODALIDAD", "112").strip(),
+        linix_destinacion=os.getenv("LINIX_DESTINACION", "PSC").strip(),
+        linix_contabilizar=os.getenv("LINIX_CONTABILIZAR", "101").strip(),
+        linix_tipo_movimiento=os.getenv("LINIX_TIPO_MOVIMIENTO", "NCV").strip(),
+        enable_oracle=enable_oracle,
+        oracle_user=oracle_user,
+        oracle_password=oracle_password,
+        oracle_dsn=oracle_dsn,
+        oracle_lib_dir=os.getenv("ORACLE_LIB_DIR", "").strip(),
+        oracle_schema=os.getenv("ORACLE_SCHEMA", "").strip(),
         run_context=run_context,
     )
